@@ -1643,7 +1643,7 @@ on a schedule, and on demand against a deployed environment. Same reasoning as t
 Part 2.3: the right trigger is the one that matches what the check is actually for.
 
 **Adopt this the moment a model output reaches a user.** Twenty questions with five negative
-controls, three dimensions, and a pass threshold is a weekend of work and it is the only thing
+controls, three dimensions, and a pass threshold is all it takes, and it is the only thing
 standing between you and a silent quality regression from a prompt tweak, a model version bump,
 or a retrieval index rebuild.
 
@@ -1938,7 +1938,7 @@ flattens for your team.
 
 11b. **If any model output reaches a user, build the eval harness now** (Part 9). Twenty
     questions, five of them negative controls, three scored dimensions, one pass threshold.
-    It is a weekend and it is not optional once you have shipped a model.
+    It is not optional once you have shipped a model.
 
 **Return**: drift stops at commit time instead of at review time. This is the phase with the
 highest measurable payoff.

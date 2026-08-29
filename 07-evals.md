@@ -4,9 +4,9 @@ Everything else in this playbook checks the code you write. This checks what a
 model produces at runtime, which nothing static can look at.
 
 **Install this the moment a model's output reaches a user.** Twenty questions,
-three scored dimensions and one threshold is a weekend of work, and it is the
-only thing standing between you and a silent quality regression from a prompt
-tweak, a model version bump, or a retrieval index rebuild.
+three scored dimensions and one threshold is all it takes, and it is the only
+thing standing between you and a silent quality regression from a prompt tweak,
+a model version bump, or a retrieval index rebuild.
 
 Working code in `examples/eval/`, with thirteen passing tests for the scoring
 logic in `eval.test.mjs`.

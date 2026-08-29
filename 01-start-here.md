@@ -8,7 +8,7 @@ Picking the wrong tier is the most common way this goes wrong: too much process
 on a prototype gets abandoned, and too little on a long-lived product gets
 expensive around month eight.
 
-## Tier 1: thirty minutes
+## Tier 1: prototype, landing page, spike
 
 ```bash
 PB=~/engineering-playbook   # wherever you cloned this repo
@@ -58,7 +58,7 @@ git add -A && git commit -m "test"     # must fail
 git checkout . && rm -f src/broken.ts
 ```
 
-## Tier 2: half a day
+## Tier 2: one app, fixed scope
 
 Everything above, then:
 
@@ -112,7 +112,7 @@ scripts, note the count, and fix them in batches. See
 [graduating warnings](03-gates.md#graduating) for how to land a check on a
 codebase that fails it.
 
-## Tier 3: two days
+## Tier 3: several apps sharing a contract
 
 Everything above, then:
 
@@ -144,7 +144,7 @@ Then the parts that are writing rather than copying:
 - **Provenance on rules**: each business rule carries who agreed it, when, and in
   whose words. See [chapter 6](06-contract.md#provenance).
 
-## Tier 4: a week, spread out
+## Tier 4: long-lived product
 
 Everything above, then:
 

@@ -66,7 +66,6 @@ without one. Find your row and use it.
 | **People** | 1 | 1 to 3 | 3 to 8, maybe split across repos | 4+, changing over time |
 | **Lifespan** | Weeks | Months | A year or more | Years |
 | **Someone will ask** | nothing | "are we on track?" | "who agreed to that?" | "why is it like this?" |
-| **Setup time** | 30 minutes | Half a day | Two days | A week, spread out |
 
 The right amount of process is set by what you will be asked to account for, not
 by how much code there is. That is the single most useful idea in this playbook,
@@ -79,8 +78,8 @@ includes everything from the tiers before it.
 
 ### Tier 1: prototype, landing page, spike
 
-Thirty minutes. You are protecting against your own future self, six weeks from
-now, having forgotten everything.
+You are protecting against your own future self, six weeks from now, having
+forgotten everything.
 
 1. `AGENTS.md` with ten lines: stack, three conventions, and what not to touch.
    Symlink `CLAUDE.md` to it. ([chapter 2](02-constitution.md))
@@ -93,8 +92,8 @@ Skip everything else. A contract model on a two-week prototype is cosplay.
 
 ### Tier 2: one app, fixed scope, a client who will ask about progress
 
-Half a day. You are protecting against the moment somebody asks how far along
-you are, and against the second developer who joins in month three.
+You are protecting against the moment somebody asks how far along you are, and
+against the second developer who joins in month three.
 
 Everything from Tier 1, plus:
 
@@ -116,8 +115,8 @@ It is not optional once a model is talking to a customer.
 
 ### Tier 3: several apps sharing a contract
 
-Two days. You are protecting against two teams implementing the same rule
-differently, and against nobody being able to say who agreed to what.
+You are protecting against two teams implementing the same rule differently,
+and against nobody being able to say who agreed to what.
 
 Everything above, plus:
 
@@ -136,9 +135,8 @@ Everything above, plus:
 
 ### Tier 4: long-lived product
 
-A week, spread over a month. You are protecting against turnover, against
-decisions being silently re-made, and against the codebase becoming something
-only three people understand.
+You are protecting against turnover, against decisions being silently re-made,
+and against the codebase becoming something only three people understand.
 
 Everything above, plus:
 
