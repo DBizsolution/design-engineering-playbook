@@ -1,0 +1,90 @@
+#!/bin/bash
+#
+# Build-log stub feed.
+#
+# After each meaningful commit, append one line to docs/build-log/_pending.md.
+# That file is a raw feed, not the build log itself: later, you or an agent
+# turns each stub into a dated entry that says WHY, and ticks it off.
+#
+# Why bother, when git log exists. Git log answers "what changed". It cannot
+# answer "why is it like this", which is the question that costs a team the most
+# time and that no tool reconstructs. On a project with a multi-year life and
+# staff turnover, the why is the highest-return thing you can write down, and a
+# feed is what makes writing it realistic: nobody remembers to start a log, but
+# everybody can drain a queue.
+#
+# NON-BLOCKING BY CONSTRUCTION. post-commit runs after the commit is made, so
+# nothing here can fail it. That is why the stub logging lives here and the
+# gates live in pre-commit.
+
+set -u
+
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+cd "$repo_root" || exit 0
+
+git_dir="$(git rev-parse --git-dir 2>/dev/null)" || exit 0
+
+# Skip replayed commits. During a rebase or cherry-pick these were already
+# logged when first authored, and writing to the worktree here dirties it, which
+# aborts the next pick mid-rebase. This one is not hypothetical; it will bite you
+# the first time you rebase.
+if [ -d "$git_dir/rebase-merge" ] || [ -d "$git_dir/rebase-apply" ] || [ -f "$git_dir/CHERRY_PICK_HEAD" ]; then
+  exit 0
+fi
+
+queue="docs/build-log/_pending.md"
+[ -f "$queue" ] || exit 0   # not set up in this checkout: do nothing.
+
+# "rapid" mode, for a burst of fast commits where a hook that dirties the
+# worktree every time is intolerable:
+#
+#   git config myproject.rapid true      (off: git config --unset myproject.rapid)
+#
+# Local to this checkout, so it never affects anyone else's clone. Stubs are
+# still written, to a spool inside .git/ that git ignores by construction.
+# Rapid means "do not touch my worktree", not "lose the feed".
+rapid="$(git config --bool myproject.rapid 2>/dev/null || true)"
+if [ "$rapid" = "true" ]; then
+  queue="$git_dir/rapid-skipped-stubs"
+fi
+
+# Skip merge commits: they carry no authored narrative.
+parents="$(git rev-list --parents -n 1 HEAD 2>/dev/null | wc -w | tr -d ' ')"
+[ "${parents:-0}" -gt 2 ] && exit 0
+
+# --root, so the very first commit in a repository is logged too. Without it,
+# diff-tree has no parent to compare against and silently prints nothing, so the
+# feed starts empty and looks like it is not wired up.
+files="$(git diff-tree --root --no-commit-id --name-only -r HEAD 2>/dev/null | sed '/^$/d')"
+[ -z "$files" ] && exit 0
+
+# Skip commits that only touch the build log, or the feed talks about itself.
+real="$(printf '%s\n' "$files" | grep -vE '^docs/build-log/' || true)"
+[ -z "$real" ] && exit 0
+
+hash="$(git rev-parse --short HEAD)"
+subject="$(git log -1 --pretty=%s)"
+cdate="$(git log -1 --date=format:%Y-%m-%d --pretty=%ad)"
+nfiles="$(printf '%s\n' "$real" | wc -l | tr -d ' ')"
+
+# Tag the area, so draining the queue later is a matter of sorting.
+areas=""
+add() { case ",$areas," in *",$1,"*) ;; *) areas="${areas:+$areas, }$1";; esac; }
+printf '%s\n' "$real" | grep -qE '^src/app/api/'                  && add "api"
+printf '%s\n' "$real" | grep -qE '^src/(components|app)/'          && add "ui"
+printf '%s\n' "$real" | grep -qE '^(prisma/|src/lib/db)'           && add "data"
+printf '%s\n' "$real" | grep -qE '^(scripts/|\.github/)'           && add "tooling"
+printf '%s\n' "$real" | grep -qE '^(contract\.json|src/types/)'    && add "contract"
+[ -z "$areas" ] && areas="other"
+
+printf -- '- [ ] `%s` %s [%s] %s (%s file(s))\n' \
+  "$hash" "$cdate" "$areas" "$subject" "$nfiles" >> "$queue"
+
+# Say so every time it is bypassed. A silent skip is how a feed dies without
+# anyone noticing that it died.
+if [ "$rapid" = "true" ]; then
+  echo "  build-log: rapid mode on. Stub spooled to ${queue}, worktree untouched."
+  echo "             Drain it and 'git config --unset myproject.rapid' when done."
+fi
+
+exit 0

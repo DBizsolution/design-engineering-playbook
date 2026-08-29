@@ -1,0 +1,55 @@
+{
+  "version": "0.3.0",
+  "updated": "2026-08-30",
+  "_comment": "The product contract. Entities and journeys the build is measured against by scripts/check-contract-coverage.mjs. Start with this much: entity ids, field names, and a hand-maintained journey state. It is worth doing at Tier 2 and up.",
+
+  "entities": [
+    {
+      "id": "invoice",
+      "description": "A bill sent to a customer. Immutable once issued.",
+      "fields": ["invoice_number", "total_amount", "customer_id", "created_at", "due_date", "line_items", "tax_rate", "pdf_url"],
+      "states": ["draft", "issued", "paid", "overdue", "void"],
+      "notes": "pdf_url is populated asynchronously after issue. Absent on a draft."
+    },
+    {
+      "id": "customer",
+      "description": "The billed party. One per Stripe customer.",
+      "fields": ["customer_id", "name", "email", "billing_address"]
+    },
+    {
+      "id": "subscription",
+      "description": "An active plan. Seat changes take effect immediately, bill at period end.",
+      "fields": ["plan", "seats", "renews_at"],
+      "source": "DECISIONS.md 2026-08-30, seat proration"
+    },
+    {
+      "id": "payment",
+      "description": "A settled charge against an invoice.",
+      "fields": ["amount", "method"]
+    }
+  ],
+
+  "journeys": [
+    { "id": "create-invoice", "state": "built" },
+    { "id": "send-invoice", "state": "partial", "gap": "no email preview, no resend. BR-014 requires both." },
+    { "id": "refund-payment", "state": "unbuilt", "gap": "entirely unbuilt. No UI, no route." }
+  ],
+
+  "rules": [
+    {
+      "id": "BR-014",
+      "text": "An invoice can be resent to the same address any number of times, but changing the recipient requires voiding and reissuing, because the original is the legal record.",
+      "applies_to": ["invoice"],
+      "source": "Client call 2026-08-12. Finance lead: 'the address on the sent one has to be the address it went to.'",
+      "status": "agreed"
+    },
+    {
+      "id": "BR-021",
+      "text": "Seat additions take effect immediately and bill at the next period boundary. Plan upgrades prorate immediately.",
+      "applies_to": ["subscription"],
+      "source": "DECISIONS.md 2026-08-30. Consolidates former BR-007 and BR-018.",
+      "status": "agreed",
+      "note": "Whether a seat REMOVAL credits at period end is an inference, not agreed. See OQ-009."
+    }
+  ]
+}

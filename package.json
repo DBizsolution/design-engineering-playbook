@@ -1,0 +1,10 @@
+{
+  "name": "engineering-playbook",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Mechanisms for keeping a codebase in good shape with several people and several AI assistants working in it. Docs plus scripts meant to be copied into other projects.",
+  "scripts": {
+    "test": "node --test examples/eval/eval.test.mjs && node --experimental-strip-types --test examples/errorToSurface.test.mjs"
+  }
+}

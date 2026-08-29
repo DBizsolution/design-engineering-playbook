@@ -1,0 +1,115 @@
+#!/bin/bash
+#
+# Pre-commit gate.
+#
+# Wired by:  git config core.hooksPath scripts/git-hooks
+# which package.json runs for you:  "prepare": "git config core.hooksPath scripts/git-hooks"
+#
+# Bypass in a real emergency:  git commit --no-verify
+# That is documented on purpose. A bypass people have to discover in a panic is
+# a bypass they will keep using afterwards.
+#
+# TWO THINGS MAKE THIS DIFFERENT FROM THE USUAL PRE-COMMIT HOOK.
+#
+# 1. It dispatches on the staged file list. A commit that only touches the
+#    README does not run the i18n checker. This is what keeps the median commit
+#    under a couple of seconds, and commit speed is the whole game: a hook that
+#    takes 40 seconds gets bypassed, and a bypassed hook enforces nothing.
+#
+# 2. It stops at the first failure. One actionable message beats a wall of
+#    output, and the second failure is often caused by the first.
+#
+# Every gate here must be satisfiable offline by anyone with a clone. A check
+# that needs credentials, network, or a tool a fresh clone lacks belongs in the
+# session-start nag instead. See chapter 2.
+
+set -u
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root" || exit 1
+
+# ACMR: added, copied, modified, renamed. Excludes deletions, so a commit that
+# only removes files does not trip checks that then try to read them.
+staged="$(git diff --cached --name-only --diff-filter=ACMR)"
+[ -z "$staged" ] && exit 0
+
+status=0
+ran=""
+
+# run_gate <name> <path-regex> <command> <fix-hint>
+#
+# The fix hint is not decoration. "Validation failed" is a gate people route
+# around; "add the key to messages/en.json and re-stage" is a gate people thank
+# you for. Making the hint a required argument is how you guarantee one exists.
+run_gate () {
+  local name="$1" pattern="$2" cmd="$3" hint="$4"
+  [ "$status" -eq 0 ] || return 0
+  printf '%s\n' "$staged" | grep -qE "$pattern" || return 0
+  ran="${ran:+$ran }$name"
+  if ! eval "$cmd" ; then
+    echo "" >&2
+    echo "  x ${name} failed." >&2
+    echo "    ${hint}" >&2
+    echo "" >&2
+    status=1
+  fi
+}
+
+# ---------------------------------------------------------------- GATES ----
+# Order matters only in that cheap checks go first, so a broken commit fails
+# fast rather than after the slow one.
+
+run_gate "typecheck" \
+  '\.(ts|tsx)$' \
+  'pnpm exec tsc --noEmit' \
+  'Fix the type errors above.'
+
+run_gate "lint" \
+  '\.(ts|tsx|js|jsx)$' \
+  'pnpm exec eslint $(printf "%s\n" "$staged" | grep -E "\.(ts|tsx|js|jsx)$" | tr "\n" " ")' \
+  'Fix the lint errors above. Each message says which rule and why it exists.'
+
+run_gate "i18n" \
+  '^(messages/|src/)' \
+  'node scripts/check-locale-keys.mjs --check' \
+  'Add the key to every locale file, then re-stage.'
+
+run_gate "env" \
+  '^(src/env\.ts|\.env\.example)$' \
+  'node scripts/check-env.mjs --check' \
+  'Add the variable to src/env.ts AND .env.example, with a comment saying where to get it.'
+
+run_gate "api" \
+  '^src/app/api/' \
+  'node scripts/check-api-routes.mjs --check' \
+  'Add the schema, the auth check, or a marker comment giving the reason it is exempt.'
+
+run_gate "components" \
+  '^src/(app|components|features)/' \
+  'node scripts/check-stray-components.mjs --check' \
+  'Promote the component to src/components/, or allowlist it with a reason.'
+
+run_gate "fixtures" \
+  '^(packages/schemas/|packages/fixtures/|src/lib/schemas)' \
+  'node scripts/verify-fixtures.mjs' \
+  'A schema no longer parses its fixture. One of the two is wrong; decide which.'
+
+# ---------------------------------------------------------------- NUDGES ---
+# Never set status. These report something worth knowing that the committer
+# cannot necessarily fix right now, so they must not block.
+
+if printf '%s\n' "$staged" | grep -qE '^(contract\.json|src/types/)' ; then
+  node scripts/check-contract-coverage.mjs 2>/dev/null | grep -E 'Overall|UNMEASURED' || true
+fi
+
+if printf '%s\n' "$staged" | grep -qE '^prisma/migrations/' ; then
+  echo "  note: a migration is staged. Its header comment should answer:"
+  echo "        is it reversible, does it lock, what is the backfill, how do we roll back."
+fi
+
+# ---------------------------------------------------------------- RESULT ---
+
+if [ "$status" -eq 0 ] ; then
+  [ -n "$ran" ] && echo "  gates passed: $ran"
+fi
+exit "$status"
