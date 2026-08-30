@@ -1,7 +1,8 @@
 # Onboarding and research
 
-Two things: getting a person productive on day one, and making sure work starts
-from what is true rather than from what someone assumed.
+Two things: getting a new designer or engineer productive on day one, and making
+sure a screen gets built from what is true rather than from what someone
+assumed.
 
 ## The doctor script
 
@@ -126,7 +127,8 @@ a silent pick:
    recorded decision, never a side effect of a redesign.
 3. **What has been decided.** The contract and the decision log. Entries tracing
    to a recorded decision stand until re-decided.
-4. **What is planned.** Tickets. **Input, not authority.**
+4. **What is planned.** Tickets, and the mockups attached to them. **Input, not
+   authority.**
 
 Two lines worth putting in the constitution verbatim:
 

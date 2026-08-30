@@ -1,12 +1,15 @@
 # The contract
 
-A machine-readable description of what the product is, separate from the code
-that implements it. Start at Tier 2, and start small: one JSON file listing your
-entities, their fields, and your journeys.
+A machine-readable description of what the product is, separate from the screens
+that implement it. For a design engineer it is the thing that ties what you build
+to what was agreed: every entity is something a screen renders, every journey is
+a flow a user walks, and every gap gets a name instead of a feeling. Start at
+Tier 2, and start small: one JSON file listing your entities, their fields, and
+your journeys.
 
-The payoff arrives in a specific moment. Someone asks how far along you are, and
-instead of "mostly done" you can say "we lift 80% of the contract, here are the
-three named gaps, and one journey is entirely unbuilt".
+The payoff arrives in a specific moment. Someone asks how far along the build is,
+and instead of "mostly done" you can say "the screens lift 80% of the contract,
+here are the three named gaps, and one journey has no UI at all".
 
 ## Start with this much
 
@@ -69,8 +72,9 @@ entities to app types, and reports coverage at three layers.
 - **Type**: the field exists in the app's TypeScript. Missing means unbuilt.
 - **Fixture**: some fixture or seed populates it. Missing means nobody has ever
   seen it with data in it.
-- **UI**: some component references it. Missing means the product collects it and
-  never shows it.
+- **UI**: some component references it. Missing means the product collects it
+  and never shows it. This is the design engineer's column: to the API a field
+  like this looks finished, and only the screens reveal that it is not.
 
 `subscription` above is the case that makes the point: fully typed, in no fixture,
 on no screen. Built, never exercised, never shown. One combined percentage hides
@@ -112,9 +116,9 @@ numbers, and a single shared score would be meaningless.
 ## Which source wins {#source-policy}
 
 At Tier 3 and up you have several documents claiming to describe the product: a
-contract or SOW, a PRD, tickets, the existing production behaviour, a competitor,
-and an email from the client. They disagree. Write down which one wins, once, and
-stop having the argument.
+contract or SOW, a PRD, a Figma file, tickets, the existing production behaviour,
+a competitor, and an email from the client. They disagree. Write down which one
+wins, once, and stop having the argument.
 
 Put this at the top of the contract file:
 
@@ -136,8 +140,10 @@ document is cheap. Writing down *why* is what stops the next person relitigating
 it in six months.
 
 **`context_rule`** gives non-authoritative sources a real job. They may explain
-and propose; they may not approve. Without it, whichever document is most
-detailed quietly becomes the requirement, which is usually a vendor proposal or a
+and propose; they may not approve. A Figma file lives here too: it is a proposal
+with pixels, and a screen faithfully built from an unapproved frame is scope
+nobody signed. Without this clause, whichever document is most detailed quietly
+becomes the requirement, which is usually the most polished mockup or a
 competitor's behaviour.
 
 **`conflict_rule`.** A conflict between sources is a finding to record, never a
@@ -203,8 +209,8 @@ the extra line.
 Never let an id die silently. Tickets, emails and code comments citing BR-007
 still need to resolve to something.
 
-**`applies_to`** lets a developer touching one entity filter to the rules that
-bind it, which is what makes a hundred-rule list usable.
+**`applies_to`** lets whoever is building a screen for one entity filter to the
+rules that bind it, which is what makes a hundred-rule list usable.
 
 ## Generating an implementation checklist
 
@@ -315,8 +321,8 @@ decisions to make its own check pass is not a gate.
 about to build. Add the next one when you get there.
 
 **Do not let the contract become a second source of truth for the code.** It
-describes intent. The code is the implementation. The coverage check measures the
-distance, and a gap is information, not necessarily a bug.
+describes intent. The screens and routes are the implementation. The coverage
+check measures the distance, and a gap is information, not necessarily a bug.
 
 **Do not make the contract a monolith.** At Tier 3 and up, one file per bounded
 context, and load one at a time. A single enormous file is unreadable for people

@@ -1,7 +1,7 @@
 # The constitution
 
-One file at the repo root that every person and every tool reads. Template:
-`examples/AGENTS.template.md`.
+One file at the repo root that every person and every tool reads before touching
+a component, a token, or a line of copy. Template: `examples/AGENTS.template.md`.
 
 ```bash
 cp examples/AGENTS.template.md AGENTS.md
@@ -85,8 +85,9 @@ promotes one back into the commit path without understanding why it was demoted.
 
 An assistant that knows a decision is not its to make will ask instead of
 guessing. So will a person who joined last week. This is three lines and it
-prevents a specific, expensive failure: someone quietly re-deciding something
-that was already settled, in a pull request that looks routine.
+prevents a specific, expensive failure: someone quietly re-deciding a settled
+thing — a spacing scale, a tone of voice, an empty-state pattern — in a pull
+request that looks routine.
 
 Pair it with the do-not-touch list:
 
@@ -110,6 +111,8 @@ assistants follow most reliably, because it converts a vague instruction into a
 list.
 
 ```markdown
+- **New shared component** -> it lives with the design system, uses tokens only,
+  and the PR names the existing sibling it copies its structure from.
 - **New user-facing string** -> the key lands in every file in `messages/` in
   the same commit.
 - **New API route** -> Zod input schema, auth check, rate limit, and a fixture
@@ -135,8 +138,9 @@ indistinguishable from a decision six weeks later.
 ```
 
 The default behaviour of both juniors and language models is to fill a gap with
-a reasonable-looking convention. That is usually fine and occasionally very
-expensive, and you cannot tell which from the diff. Making it an explicit policy
+a reasonable-looking convention: an 8px that should have been a token, an English
+string where a key belongs. That is usually fine and occasionally very expensive,
+and you cannot tell which from the diff. Making it an explicit policy
 violation changes the behaviour, because it gives people permission to stop.
 
 Pair it with somewhere for the question to go: `docs/OPEN-QUESTIONS.md`, or

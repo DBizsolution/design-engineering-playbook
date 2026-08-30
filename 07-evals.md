@@ -1,7 +1,11 @@
 # Evals
 
 Everything else in this playbook checks the code you write. This checks what a
-model produces at runtime, which nothing static can look at.
+model produces at runtime — the AI-written answer, summary or generated copy
+that your interface presents as part of the product. Nothing static can look at
+it, and to the person reading the screen, a fabricated answer rendered inside
+your carefully designed component is not a model failure. It is a product
+failure, and it is yours.
 
 **Install this the moment a model's output reaches a user.** Twenty questions,
 three scored dimensions and one threshold is all it takes, and it is the only
@@ -161,10 +165,12 @@ product value.
 > on a hedge-filled answer is poor calibration. "low" confidence on a well-sourced
 > specific answer is also poor calibration.
 
-If your product surfaces a confidence signal, a hedge, or a "not sure" state,
-that signal is a product claim and needs its own test. A confidently wrong answer
-and a hedged wrong answer are different failures with different blast radii, and
-only a calibration dimension tells them apart.
+If your interface surfaces a confidence signal, a hedge, or a designed "not
+sure" state, that state is a product claim and needs its own test. A confidently
+wrong answer and a hedged wrong answer are different failures with different
+blast radii, and only a calibration dimension tells them apart. You designed the
+empty state and the error state; the "model is not sure" state is the same kind
+of deliverable, and this dimension is what keeps it honest.
 
 ## Break the summary down by segment
 

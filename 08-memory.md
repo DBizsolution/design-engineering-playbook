@@ -4,30 +4,34 @@ Three artifacts that stop knowledge leaving with people: a decision log, a build
 log fed automatically, and a resume pointer for whoever sits down next.
 
 Git log answers "what changed". None of these compete with it. They answer "why
-is it like this", which is the question that costs the most time and that no tool
-reconstructs.
+is it like this" — why the empty state is a full-page illustration here and a
+one-liner there, why this one screen is allowed to break the token system, why
+the banner pattern won over the toast. That is the question that costs the most
+time, and no tool reconstructs it.
 
 ## Decisions
 
 `docs/DECISIONS.md`. Append only, newest at the top. Start at Tier 1.
 
 ```markdown
-### 2026-08-30 | billing | Seat changes bill at period end, not immediately
+### 2026-08-30 | invoices | Overdue is a persistent banner, not a toast
 
-**Priya, 2026-08-30:** "customers keep getting surprise invoices mid-month"
+**Priya, 2026-08-30:** "customers keep missing the overdue notice and then
+dispute the late fee"
 
-**Decided:** seat additions take effect immediately but bill at the next period
-boundary. Plan upgrades still prorate immediately, because the customer initiated
-a change they expect to pay for now.
+**Decided:** overdue renders as a persistent banner on the invoice list and
+detail, dismissible per invoice and re-shown after seven days. Toasts stay for
+transient confirmations only, because an overdue invoice is a state, not an
+event, and state gets a persistent surface.
 
-**Why not immediate proration:** it produces an invoice per seat change, which is
-what the complaints are about, and Stripe's proration line items are unreadable
-to a customer.
+**Why not a toast:** it is gone in four seconds, and the people who miss it are
+exactly the people who were not looking.
 
-**Dead end:** we batched proration into a daily job first. It moved the surprise
-from per-change to per-day rather than removing it.
+**Dead end:** we tried a badge on the sidebar count first. Nobody connected the
+number to money owed.
 
-**Boundary:** seat count only. Does not apply to plan changes.
+**Boundary:** invoice states only. This does not license a banner for every
+warning; the banner slot holds one message, worst first.
 ```
 
 Four habits that make this worth keeping:
@@ -37,10 +41,10 @@ indistinguishable from a reconstruction. A quote is evidence, and it also record
 what the actual problem was rather than the solution someone reached for.
 
 **Record the dead ends.** Most of the value of a decision log is in the options
-that lost. Without them, someone re-proposes the daily batch job in March.
+that lost. Without them, someone re-proposes the sidebar badge in March.
 
-**Give exceptions a boundary.** "Boundary: seat count only" is what stops an
-exception becoming precedent for anything.
+**Give exceptions a boundary.** "Boundary: invoice states only" is what stops a
+pattern decision becoming precedent for every warning in the product.
 
 **Never edit an old entry.** If you disagree, write a new one that supersedes it
 and say so. The history of a changed mind is more useful than a tidy file.
@@ -60,7 +64,7 @@ post-commit hook feeds it.
 `docs/build-log/_pending.md`:
 
 ```
-- [ ] `d3ee0e5` 2026-08-30 [api, ui] feat(reports): monthly report endpoint (2 file(s))
+- [ ] `d3ee0e5` 2026-08-30 [ui] feat(invoices): overdue banner on list and detail (4 file(s))
 ```
 
 That file is a raw feed, not the log. Later, you or an assistant turns each stub
@@ -124,13 +128,14 @@ Tier 4, and Tier 3 if work gets picked up and put down.
 <!-- RESUME:START -->
 ## Where to pick up
 
-**State.** Invoice list and detail are done. Refund flow is scaffolded but the
-Stripe call is stubbed.
+**State.** Invoice list and detail are done. The overdue banner is built, but
+dismissing it is local state only and does not persist.
 
-**Next step.** Wire `POST /api/refunds` to stripe.refunds.create, then remove
-the stub in src/lib/billing.ts:44.
+**Next step.** Store dismissals in user preferences, then remove the stub in
+src/components/OverdueBanner.tsx:31.
 
-**Open question.** Do partial refunds need approval? Asked the client 2026-08-28.
+**Open question.** Does dismissing on the list also dismiss on the detail?
+Asked design 2026-08-28.
 <!-- RESUME:END -->
 
 ## Archive

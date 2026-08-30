@@ -1,8 +1,11 @@
-# The Engineering Playbook
+# The Design Engineering Playbook
 
-A set of mechanisms for keeping a codebase in good shape when several people and
-several AI assistants are working in it. Everything here is running in a real
-project. The scripts in `scripts/` are tested and work as written.
+A set of mechanisms for keeping a product's interface in good shape when several
+people and several AI assistants are building it. Design engineering is the work
+of making the shipped UI as considered as the design: the tokens stay tokens, the
+components stay consistent, the copy stays translatable, and none of it depends
+on one person remembering. Everything here is running in a real project. The
+scripts in `scripts/` are tested and work as written.
 
 The playbook is written for Next.js, React, TypeScript, Tailwind and shadcn/ui,
 because that is where most of this will be used. Where React Native differs, the
@@ -32,7 +35,7 @@ npm test     # 23 tests: the eval harness and the error-surface classifier
 
 ```
 README.md            this file: the tiers, and what to install for each
-01-start-here.md     the setup path for your project's size. Start here.
+01-start-here.md     the setup path for your project's shape. Start here.
 02-constitution.md   the one file every person and tool reads
 03-gates.md          the hook system, and when a check should not be a gate
 04-checks.md         each check: what it catches, how to install, how to tune
@@ -54,15 +57,15 @@ the specific failure that produced it. Read it when you want the reasoning behin
 a rule, or when you need to argue for one. The chapters here are the
 implementation; the survey is the evidence.
 
-## Four project sizes
+## Four project shapes
 
-Most advice fails because it assumes one size. A landing page does not need a
-contract model. A four-year product with six contributors does not survive
-without one. Find your row and use it.
+Most advice fails because it assumes one shape. A design spike does not need a
+contract model. A four-year product with six contributors and a shared design
+system does not survive without one. Find your column and use it.
 
 | | Tier 1 | Tier 2 | Tier 3 | Tier 4 |
 |---|---|---|---|---|
-| **Shape** | Prototype, landing page, spike | One app, fixed scope | Several apps sharing a contract | Long-lived product |
+| **Shape** | Prototype, landing page, design spike | One product UI, fixed scope | Several apps sharing a design system | Long-lived product and its design system |
 | **People** | 1 | 1 to 3 | 3 to 8, maybe split across repos | 4+, changing over time |
 | **Lifespan** | Weeks | Months | A year or more | Years |
 | **Someone will ask** | nothing | "are we on track?" | "who agreed to that?" | "why is it like this?" |
@@ -76,10 +79,10 @@ and it is why the tiers are defined by accountability rather than by size.
 Each item links to the chapter that explains it. Do them in order. Every tier
 includes everything from the tiers before it.
 
-### Tier 1: prototype, landing page, spike
+### Tier 1: prototype, landing page, design spike
 
 You are protecting against your own future self, six weeks from now, having
-forgotten everything.
+forgotten why the spacing is hand-tuned on that one section.
 
 1. `AGENTS.md` with ten lines: stack, three conventions, and what not to touch.
    Symlink `CLAUDE.md` to it. ([chapter 2](02-constitution.md))
@@ -90,22 +93,23 @@ forgotten everything.
 
 Skip everything else. A contract model on a two-week prototype is cosplay.
 
-### Tier 2: one app, fixed scope, a client who will ask about progress
+### Tier 2: one product UI, fixed scope, a client who will ask about progress
 
 You are protecting against the moment somebody asks how far along you are, and
-against the second developer who joins in month three.
+against the second builder — human or assistant — whose output quietly diverges
+from yours in month three.
 
 Everything from Tier 1, plus:
 
 5. The full path-dispatched pre-commit hook. ([chapter 3](03-gates.md))
 6. Design token and copy rules in ESLint, **plus the probe file that proves they
    fire**. ([chapter 4](04-checks.md#lint))
-7. `check-api-routes.mjs`: every route validates, authenticates and rate limits.
-   ([chapter 4](04-checks.md#api))
-8. `verify-fixtures.mjs`: every schema parses a real captured payload.
-   ([chapter 4](04-checks.md#fixtures))
-9. `errorToSurface.ts`: decide once where each kind of message goes.
-   ([chapter 5](05-judgement.md))
+7. `check-api-routes.mjs`: every route behind your UI validates, authenticates
+   and rate limits. ([chapter 4](04-checks.md#api))
+8. `verify-fixtures.mjs`: every schema parses a real captured payload, so the
+   data your screens render stays real. ([chapter 4](04-checks.md#fixtures))
+9. `errorToSurface.ts`: decide once which surface each kind of message gets —
+   toast, inline, banner. ([chapter 5](05-judgement.md))
 10. `doctor.sh` and a short onboarding page. ([chapter 9](09-onboarding.md))
 11. A `contract.json` listing entities and journeys, and `check-contract-coverage.mjs`.
     This is what turns "mostly done" into a number. ([chapter 6](06-contract.md))
@@ -113,10 +117,10 @@ Everything from Tier 1, plus:
 If you ship any AI-generated output to users, add [chapter 7](07-evals.md) here.
 It is not optional once a model is talking to a customer.
 
-### Tier 3: several apps sharing a contract
+### Tier 3: several apps sharing a design system
 
-You are protecting against two teams implementing the same rule differently,
-and against nobody being able to say who agreed to what.
+You are protecting against two teams building the same pattern differently, and
+against nobody being able to say who agreed to what.
 
 Everything above, plus:
 
@@ -133,10 +137,10 @@ Everything above, plus:
 17. Rules with provenance: every business rule carries who agreed it and when.
     ([chapter 6](06-contract.md#provenance))
 
-### Tier 4: long-lived product
+### Tier 4: long-lived product and its design system
 
 You are protecting against turnover, against decisions being silently re-made,
-and against the codebase becoming something only three people understand.
+and against the UI becoming something only three people can change safely.
 
 Everything above, plus:
 
@@ -157,8 +161,9 @@ this section.
 
 ### 1. A rule with no check is not a rule
 
-A convention that lives only in a style guide decays at exactly the rate people
-join the team. So the constitution carries a table with two columns: the rule,
+A design convention that lives only in a style guide decays at exactly the rate
+people join the team. "Use tokens, not hex values" is a wish until a commit that
+breaks it fails. So the constitution carries a table with two columns: the rule,
 and the command that fails when it is broken. Writing the table is the forcing
 function. A rule with an empty cell either becomes a check, or gets moved into
 the section that says out loud that it is enforced by review. There is no third
@@ -204,10 +209,18 @@ Do this in lint messages, allowlist entries, CI workflow headers, and decision
 log entries. It is the highest-return habit in the playbook and it costs one
 sentence.
 
-## A note on what this is not
+## What this covers, and what it does not
 
-This is not a quality process for its own sake. Every mechanism here exists
-because something specific went wrong, and each chapter says what. If you cannot
-point at the failure a check is preventing, you probably do not need that check
-yet. Adding all of it to a two-week project would be a mistake, and the tier
-table above exists so you do not.
+This playbook covers the mechanics of keeping a UI codebase honest: conventions
+that enforce themselves, a spec you can measure against, quality gates for AI
+output, and memory that survives turnover.
+
+It does not yet cover accessibility auditing, visual regression testing,
+performance budgets, or observability. That is deliberate rather than an
+oversight: every mechanism here exists because something specific went wrong in
+a real project, and each chapter says what. When one of those areas produces its
+first real failure, it earns its chapter and its check — written the same way,
+with the incident attached. If you cannot point at the failure a check is
+preventing, you probably do not need that check yet. Adding all of it to a
+two-week project would be a mistake, and the tier table above exists so you do
+not.

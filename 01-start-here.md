@@ -5,10 +5,10 @@ before it.
 
 If you have not read the tier table in the [README](README.md), do that first.
 Picking the wrong tier is the most common way this goes wrong: too much process
-on a prototype gets abandoned, and too little on a long-lived product gets
+on a design spike gets abandoned, and too little on a long-lived product UI gets
 expensive around month eight.
 
-## Tier 1: prototype, landing page, spike
+## Tier 1: prototype, landing page, design spike
 
 ```bash
 PB=~/engineering-playbook   # wherever you cloned this repo
@@ -58,14 +58,14 @@ git add -A && git commit -m "test"     # must fail
 git checkout . && rm -f src/broken.ts
 ```
 
-## Tier 2: one app, fixed scope
+## Tier 2: one product UI, fixed scope
 
 Everything above, then:
 
 ```bash
 PB=~/engineering-playbook   # wherever you cloned it
 
-# Lint rules, and the probe that proves they fire.
+# Design-token and copy rules, and the probe that proves they fire.
 cp $PB/scripts/eslint-rules.mjs scripts/
 cp $PB/scripts/check-probes.mjs scripts/
 mkdir -p scripts/probes && cp $PB/scripts/probes/rules.probe.tsx scripts/probes/
@@ -81,12 +81,12 @@ $EDITOR eslint.config.mjs   # add: rules: { 'no-restricted-syntax': ['error', ..
 npm pkg set scripts.probes="node scripts/check-probes.mjs"
 pnpm probes                 # must print "ok" before you trust any of the rules
 
-# API, fixtures, components.
+# The routes behind the UI, and the payloads they return.
 cp $PB/scripts/check-api-routes.mjs $PB/scripts/verify-fixtures.mjs scripts/
 npm pkg set scripts.api:check="node scripts/check-api-routes.mjs --check"
 npm pkg set scripts.verify:fixtures="node scripts/verify-fixtures.mjs"
 
-# Where messages go.
+# Where each kind of error surfaces in the UI.
 mkdir -p src/lib/errors
 cp $PB/examples/errorToSurface.ts src/lib/errors/
 cp $PB/examples/errorToSurface.test.mjs src/lib/errors/
@@ -107,12 +107,13 @@ npm pkg set scripts.check="pnpm typecheck && pnpm lint && pnpm probes && pnpm en
 ```
 
 **Expect the first run to be red.** Every one of these finds real things on an
-existing codebase. Do not fix them all before committing the scripts. Commit the
+existing UI codebase: hardcoded hex values, strings that never met `messages/`,
+routes with no schema. Do not fix them all before committing the scripts. Commit the
 scripts, note the count, and fix them in batches. See
 [graduating warnings](03-gates.md#graduating) for how to land a check on a
 codebase that fails it.
 
-## Tier 3: several apps sharing a contract
+## Tier 3: several apps sharing a design system and contract
 
 Everything above, then:
 
@@ -144,7 +145,7 @@ Then the parts that are writing rather than copying:
 - **Provenance on rules**: each business rule carries who agreed it, when, and in
   whose words. See [chapter 6](06-contract.md#provenance).
 
-## Tier 4: long-lived product
+## Tier 4: a long-lived product and its design system
 
 Everything above, then:
 
@@ -190,7 +191,7 @@ Then the writing:
 - **A research protocol** in the constitution: what to read before building, and
   the order sources win in. See [chapter 9](09-onboarding.md#research).
 
-## If you are adding this to an existing codebase
+## If you are adding this to an existing UI codebase
 
 The instinct is to fix everything before turning a check on. Do not. You will
 lose a week and turn nothing on.

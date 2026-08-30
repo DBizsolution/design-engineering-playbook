@@ -4,6 +4,11 @@ Reference for each script in `scripts/`. Every one is tested and works as
 written. For each: what it catches, why nothing else catches it, how to install
 it, and how to tune it.
 
+Together they hold the line that matters to a design engineer: the shipped UI
+keeps using the token system, the copy stays translatable, shared components
+stay shared, and the data behind the screens keeps matching what the screens
+render.
+
 They are all plain Node with no dependencies except the ones your project already
 has. Run any of them with no arguments to see what it finds; add `--check` to
 make it exit non-zero.
@@ -11,14 +16,14 @@ make it exit non-zero.
 | Check | Catches | Tier |
 |---|---|---|
 | [lint rules](#lint) | hardcoded colour, sizes, physical spacing, untranslated copy | 2 |
-| [probes](#probes) | a lint rule that silently stopped working | 2 |
-| [env](#env) | a variable that will be missing in production | 1 |
-| [api](#api) | a route with no validation, no auth, or no rate limit | 2 |
-| [fixtures](#fixtures) | a schema that no longer matches the real payload | 2 |
+| [probes](#probes) | a design rule that silently stopped working | 2 |
+| [env](#env) | a variable the UI needs that will be missing in production | 1 |
+| [api](#api) | a route behind the UI with no validation, auth, or rate limit | 2 |
+| [fixtures](#fixtures) | a schema that no longer matches the data the UI renders | 2 |
 | [i18n](#i18n) | a translation key that does not exist | 3 |
 | [components](#components) | shared UI stranded in one route, or defined twice | 3 |
 | [boundaries](#boundaries) | server code imported into the browser bundle | 3 |
-| [coverage](#coverage) | how much of the contract is actually built | 2 |
+| [coverage](#coverage) | how much of the contract is actually on screen | 2 |
 
 ---
 
@@ -54,7 +59,9 @@ Arbitrary font sizes, including inside a ternary. Physical directional spacing
 `aria-label`, `placeholder` and `alt`. Em dashes in JSX text.
 
 **Why nothing else catches it.** All of these are well-formed TypeScript. The
-compiler has no opinion about whether `bg-[#ff0055]` should have been a token.
+compiler has no opinion about whether `bg-[#ff0055]` should have been a token,
+and an assistant will produce that class in perfectly idiomatic Tailwind unless
+something mechanical objects.
 
 **Tuning.** The groups are split deliberately: `rtlRules` are correctness and
 never relax; `tokenRules` are taste and a sandbox may relax them; `copyRules`
@@ -120,7 +127,9 @@ Optionally, with a committed list of what the hosting platform has set, it also
 catches a variable that will be missing in production.
 
 **Why nothing else catches it.** Nothing in the type system knows that
-`.env.example` and your Vercel project settings exist.
+`.env.example` and your Vercel project settings exist. The symptom reaches a
+design engineer as a preview deploy that renders a blank screen, or a demo that
+falls over in front of a client, with no hint that one variable is the reason.
 
 **Assumes** you validate env at boot with Zod, which is worth doing anyway:
 
@@ -149,7 +158,8 @@ variables are not set, so the check would fail for the wrong reason.
 
 **What it catches.** A route handler that accepts a body without validating it,
 has no auth check, or declares no rate limit. Plus an exemption marker with no
-stated reason.
+stated reason. In a Next.js app these handlers sit directly behind your forms
+and mutations: they are part of the UI's surface, whoever wrote them.
 
 **Why nothing else catches it.** `req.json()` returns `any`, so TypeScript will
 happily let you treat the result as whatever you claim. Nothing warns that a
@@ -192,7 +202,9 @@ describe. Also fixtures with no schema, and schemas with no fixture.
 **Why it is the best value test in a TypeScript project.** TypeScript checks the
 shape you told it about. It cannot check that the shape matches what the API
 actually sends, because the data arrives as `any` and is asserted into existence.
-This is the check that notices when an upstream API changed.
+When the two drift, the UI is where it surfaces: a column of `NaN`, an empty
+state over data that exists, a date rendering as `Invalid Date`. This is the
+check that notices the upstream change before a screen does.
 
 **The discipline it enforces.** Schemas are parsers verified against real
 captured payloads, not descriptions written from documentation. Add a field to a
@@ -260,6 +272,9 @@ are in use.
 ## Stray components {#components}
 
 `scripts/check-stray-components.mjs`
+
+A design system's promise is one source per pattern. These two checks watch the
+two ways that promise breaks in practice.
 
 **Two separate checks**, because they fail differently.
 
@@ -349,6 +364,7 @@ has actually implemented, scored at three layers.
     customer: billing_address
 ```
 
-The three layers are the point. `subscription` above is fully typed and appears
-in no fixture and on no screen: built, never exercised, never shown. One combined
-percentage would hide that.
+The three layers are the point, and the UI column is the one a design engineer
+answers for. `subscription` above is fully typed and appears in no fixture and
+on no screen: built, never exercised, never shown. One combined percentage
+would hide exactly that.

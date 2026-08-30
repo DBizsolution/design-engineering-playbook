@@ -1,6 +1,13 @@
 # Gates
 
-How to run checks so people do not route around them.
+How to run checks so people, and the assistants working beside them, do not
+route around them.
+
+The stakes for a design engineer are concrete. A hardcoded hex ships and the
+token system becomes a suggestion. `pl-4` lands in an RTL product and sits on
+the wrong side of the screen. An AI assistant that breaks a convention breaks
+it at scale, in confident, well-formed code. Gates are how a design system
+survives volume.
 
 The template is `scripts/git-hooks/pre-commit`, which is tested and works as
 written. This chapter explains the decisions inside it, and the two questions
@@ -40,9 +47,10 @@ run_gate "i18n" '^(messages/|src/)' \
 ```
 
 A commit that only touches the README runs nothing. A commit that touches one
-route runs the API check and nothing else. This keeps the median commit to a
-couple of seconds, and commit speed is the whole game. A hook that takes forty
-seconds gets bypassed, and a bypassed hook enforces nothing.
+component runs the type check and the design lint, not the API audit. This
+keeps the median commit to a couple of seconds, and commit speed is the whole
+game. A hook that takes forty seconds gets bypassed, and a bypassed hook
+enforces nothing.
 
 Three details in that snippet that are easy to miss:
 
@@ -189,8 +197,9 @@ const ALLOWLIST = {
 ## Prove the check actually fires
 
 A check that matches nothing looks exactly like a check with nothing to
-complain about. Both print green. This is the worst failure mode a check can
-have, because it reads as coverage that does not exist.
+complain about. Both print green. For design rules this is the worst failure
+mode there is, because it reads as token coverage that does not exist while
+hardcoded values quietly accumulate.
 
 Two real examples from the projects this playbook came from, both of which
 survived for weeks:

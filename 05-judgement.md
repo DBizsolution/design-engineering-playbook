@@ -1,8 +1,10 @@
 # The rules no check can enforce
 
-Every check in chapter 4 is about what a *value* may be. That means code can use
-only design tokens, only translation keys, only logical spacing, and still be
-put together wrong. Every piece of a bad assembly is legal on its own.
+Every check in chapter 4 is about what a *value* may be. A screen can use only
+design tokens, only translation keys, only logical spacing, and still be put
+together wrong: the layout copied from nowhere, the empty state invented fresh,
+the primary action in a place no other screen puts it. Every piece of a bad
+assembly is legal on its own.
 
 This is the gap where a team ends up individually compliant and collectively
 inconsistent, and it is worth naming out loud in the constitution:
@@ -23,14 +25,15 @@ A settings page copies a settings page. A list page copies a list page. A form
 copies a form.
 
 This costs nothing, works identically for people and assistants, and prevents the
-specific failure of a batch of files built in one sitting that are perfectly
+specific failure of a batch of screens built in one sitting that are perfectly
 consistent with each other and inconsistent with everything that came before. It
 happens because the person building them never opened a sibling, and no check
 will ever object.
 
-Put it in the constitution verbatim. Extend it: "before adding a route handler,
-open the nearest sibling route", "before adding a background job, open the
-nearest sibling job".
+Put it in the constitution verbatim. Extend it to everything that has a sibling:
+"before adding a dialog, open the nearest sibling dialog", "before adding an
+empty state, open the nearest sibling empty state", "before adding a route
+handler, open the nearest sibling route".
 
 ## Where a message goes
 
